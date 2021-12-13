@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.db.models import Model
+from django.utils.functional import SimpleLazyObject
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
@@ -21,18 +22,17 @@ class SessionTokenAuthentication(TokenAuthentication):
 
     def authenticate(self, request):
         self.request = request
-        super(SessionTokenAuthentication, self).authenticate(request)
+        return super(SessionTokenAuthentication, self).authenticate(request)
 
     def authenticate_credentials(self, key):
         user_id = self.request.session.get("user_id")
         if user_id is not None:
-            user_model: Model = apps.get_model(settings.AUTH_USER_MODEL)
-            try:
-                user = user_model.objects.get(id=user_id)
-            except Model.DoesNotExist:
-                raise exceptions.AuthenticationFailed(_('Invalid token.'))
-            if hasattr(user, "is_active") and not user.is_active:
-                raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            user = SimpleLazyObject(lambda: self.get_user(user_id))
             return (user, key)
         else:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
+
+    def get_user(self, user_id):
+        user_model: Model = apps.get_model(settings.AUTH_USER_MODEL)
+        user = user_model.objects.get(id=user_id)
+        return user

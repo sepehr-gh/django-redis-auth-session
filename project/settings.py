@@ -44,12 +44,25 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "redisauthtoken.middlewares.AuthorizationTokenSession",
     'django.middleware.common.CommonMiddleware',
     "project.middlewares.DisableCSRFMiddleware",
+    "redisauthtoken.middlewares.AuthenticationMiddleWare",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'redisauthtoken.authentications.SessionTokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
 
 ROOT_URLCONF = 'project.urls'
 
@@ -127,6 +140,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTHENTICATION_BACKENDS = ["redisauthtoken.backends.FinvestBackend"]
 
 SESSION_ENGINE = 'redis_sessions.session'
 SESSION_REDIS_UNIX_DOMAIN_SOCKET_PATH = '/var/run/redis/redis.sock'

@@ -14,6 +14,8 @@ class AuthenticationMiddleWare(MiddlewareMixin):
 
     def process_request(self, request):
         user = SimpleLazyObject(lambda: self.get_user(request))
+        setattr(user, "wtf", True)
+        user.wtf = True
         request.user = user
         request._cached_user = user
 
