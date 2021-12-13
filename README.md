@@ -1,0 +1,1 @@
+A sample project to run Django with token based authorization and redis as session storage, including lazy user loading
