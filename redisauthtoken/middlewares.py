@@ -1,3 +1,4 @@
+import django
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -24,7 +25,7 @@ class AuthenticationMiddleWare(MiddlewareMixin):
         try:
             user_id = request.session.get("user_id", None)
             user = user_model.objects.get(id=user_id)
-        except Model.DoesNotExist:
+        except django.contrib.auth.models.User.DoesNotExist:
             user = AnonymousUser()
         return user
 
